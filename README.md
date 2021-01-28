@@ -15,6 +15,8 @@ Neste repositório estarão disponíveis nosso *Workshop* de implementação faz
 4. [EchoServer Service](#workshop-k8s-echoserver-service)
 5. [EchoServer Shell Pod](#workshop-k8s-echoserver-shellpod)
 6. [EchoServer Scale](#workshop-k8s-echoserver-scale)
+7. [PHP Deploy](#workshop-k8s-php-deploy)
+8. [DNS](#workshop-k8s-dns)
 
 ## Implementação
 
@@ -115,4 +117,41 @@ Neste repositório estarão disponíveis nosso *Workshop* de implementação faz
   service "hello-node" deleted
   deployment.apps "hello-node" deleted
   replicaset.apps "hello-node-7bf657c596" deleted
+  ```
+
+### 7 - PHP Deploy <a name="workshop-k8s-php-deploy">
+
+  Sintaxe: `kubectl -n impacta create deployment php --image=viniciusmartinez/fskubernetes-php:1.0`
+  ```
+  deployment.apps/php created
+
+  kubectl -n impacta expose deployment php --type=LoadBalancer --port=80
+  service/php exposed
+
+  minikube -n impacta service php
+
+  while true; do curl $PHP_SERVICE_IP:$PHP_SERVICE_PORT; echo ""; sleep 1; done
+
+  kubectl -n impacta scale --replicas=3 deployment php
+  deployment.apps/php scaled
+  ```
+
+### 8 - DNS <a name="workshop-k8s-dns">
+
+  Sintaxe:
+  ```
+  kubectl -n impacta create deployment hello-node --image=k8s.gcr.io/echoserver:1.4
+  deployment.apps/hello-node created
+
+  kubectl -n impacta get pods
+  NAME                          READY   STATUS    RESTARTS   AGE
+  hello-node-7bf657c596-4b8b5   1/1     Running   0          21s
+  php-79bcdbcb59-9k5nv          1/1     Running   0          3m43s
+  php-79bcdbcb59-bjjgg          1/1     Running   0          8m38s
+  php-79bcdbcb59-wnxwm          1/1     Running   0          3m42s
+
+  kubectl -n impacta exec -it $POD_ID -- /bin/bash
+
+  curl http://$SERVICE_IP:SERVICE_PORT
+  curl http://php:80
   ```
